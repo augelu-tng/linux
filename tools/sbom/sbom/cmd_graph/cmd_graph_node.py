@@ -9,6 +9,8 @@ from typing import Iterator, Protocol
 
 from sbom import sbom_logging
 from sbom.cmd_graph.cmd_file import CmdFile
+from sbom.cmd_graph.hardcoded_dependencies import get_hardcoded_dependencies
+from sbom.cmd_graph.incbin_parser import parse_incbin_statements
 from sbom.path_utils import PathStr, is_relative_to
 
 
@@ -104,12 +106,32 @@ class CmdGraphNode:
             )
             return node
 
+        # Search for dependencies to add to the graph as child nodes. Child paths are always relative to the output tree.
+        def _build_child_node(child_path: PathStr) -> "CmdGraphNode":
+            return CmdGraphNode.create(child_path, config, cache, depth + 1)
+
+        node.hardcoded_dependencies = [
+            _build_child_node(hardcoded_dependency_path)
+            for hardcoded_dependency_path in get_hardcoded_dependencies(
+                target_path_absolute, config.obj_tree, config.src_tree
+            )
+        ]
+
         if cmd_file is not None:
             node.cmd_file_dependencies = [
-                CmdGraphNode.create(cmd_file_dependency_path, config, cache, depth + 1)
+                _build_child_node(cmd_file_dependency_path)
                 for cmd_file_dependency_path in cmd_file.get_dependencies(
                     target_path, config.obj_tree, config.fail_on_unknown_build_command
                 )
+            ]
+
+        if node.absolute_path.endswith(".S"):
+            node.incbin_dependencies = [
+                IncbinDependency(
+                    node=_build_child_node(incbin_statement.path),
+                    full_statement=incbin_statement.full_statement,
+                )
+                for incbin_statement in parse_incbin_statements(node.absolute_path)
             ]
 
         return node
