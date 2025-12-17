@@ -772,7 +772,7 @@ endif
 # in addition to whatever we do anyway.
 # Just "make" or "make all" shall build modules as well
 
-ifneq ($(filter all modules nsdeps compile_commands.json clang-%,$(MAKECMDGOALS)),)
+ifneq ($(filter all modules nsdeps compile_commands.json clang-% sbom,$(MAKECMDGOALS)),)
   KBUILD_MODULES := y
 endif
 
@@ -1457,6 +1457,17 @@ prepare: tools/bpf/resolve_btfids
 endif
 endif
 
+PHONY += sbom
+sbom: all
+	$(Q)mkdir -p $(objtree)/tools
+	$(Q)$(MAKE) \
+		O=$(abspath $(objtree)) \
+		subdir=tools \
+		-C $(srctree)/tools/ \
+		sbom \
+		srctree=$(abspath $(srctree)) \
+		CONFIG_MODULES=$(CONFIG_MODULES)
+
 # The tools build system is not a part of Kbuild and tends to introduce
 # its own unique issues. If you need to integrate a new tool into Kbuild,
 # please consider locating that tool outside the tools/ tree and using the
@@ -1612,7 +1623,7 @@ CLEAN_FILES += vmlinux.symvers modules-only.symvers \
 	       modules.builtin.ranges vmlinux.o.map vmlinux.unstripped \
 	       compile_commands.json rust/test \
 	       rust-project.json .vmlinux.objs .vmlinux.export.c \
-               .builtin-dtbs-list .builtin-dtb.S
+	       .builtin-dtbs-list .builtin-dtb.S sbom-*.spdx.json
 
 # Directories & files removed with 'make mrproper'
 MRPROPER_FILES += include/config include/generated          \

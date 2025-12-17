@@ -27,6 +27,7 @@ help:
 	@echo '  nolibc                 - nolibc headers testing and installation'
 	@echo '  objtool                - an ELF object analysis tool'
 	@echo '  perf                   - Linux performance measurement and analysis tool'
+	@echo '  sbom                   - SBOM generation tool'
 	@echo '  selftests              - various kernel selftests'
 	@echo '  sched_ext              - sched_ext example schedulers'
 	@echo '  bootconfig             - boot config tool'
@@ -70,7 +71,7 @@ acpi: FORCE
 cpupower: FORCE
 	$(call descend,power/$@)
 
-counter dma firewire hv guest bootconfig spi usb virtio mm bpf iio gpio objtool leds wmi firmware debugging tracing: FORCE
+counter dma firewire hv guest bootconfig spi usb virtio mm bpf iio gpio objtool leds wmi firmware debugging tracing sbom: FORCE
 	$(call descend,$@)
 
 bpf/%: FORCE
