@@ -29,7 +29,11 @@ $(SBOM_TARGETS) &: $(SBOM_DEPS)
 		sed 's/\.o$$/.ko/' $(objtree)/modules.order >> $(SBOM_ROOTS_FILE); \
 	fi
 
-	@python3 sbom.py
+	@python3 sbom.py \
+      --src-tree $(srctree) \
+      --obj-tree $(objtree) \
+      --roots-file $(SBOM_ROOTS_FILE) \
+      --output-directory $(objtree)
 
 	@rm $(SBOM_ROOTS_FILE)
 
