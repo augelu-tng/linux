@@ -1739,6 +1739,7 @@ help:
 	@echo  ''
 	@echo  'Tools:'
 	@echo  '  nsdeps          - Generate missing symbol namespace dependencies'
+	@echo  '  sbom            - Generate Software Bill of Materials'
 	@echo  ''
 	@echo  'Kernel selftest:'
 	@echo  '  kselftest         - Build and run kernel selftest'
@@ -2118,6 +2119,12 @@ PHONY += nsdeps
 nsdeps: export KBUILD_NSDEPS=1
 nsdeps: modules
 	$(Q)$(CONFIG_SHELL) $(srctree)/scripts/nsdeps
+
+# Script to generate .spdx.json SBOM documents describing the build
+# ---------------------------------------------------------------------------
+PHONY += sbom
+sbom: all
+	$(Q)$(MAKE) $(build)=scripts/sbom
 
 # Clang Tooling
 # ---------------------------------------------------------------------------
