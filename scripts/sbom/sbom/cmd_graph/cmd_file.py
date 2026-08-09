@@ -71,16 +71,13 @@ class CmdFile:
 
         return CmdFile(cmd_file_path, savedcmd, make_prereqs, deps)
 
-    def get_dependencies(
-        self: "CmdFile", target_path: PathStr, obj_tree: PathStr, fail_on_unknown_build_command: bool
-    ) -> list[PathStr]:
+    def get_dependencies(self: "CmdFile", target_path: PathStr, obj_tree: PathStr) -> list[PathStr]:
         """
         Parses all dependencies required to build a target file from its cmd file.
 
         Args:
             target_path: path to the target file relative to `obj_tree`.
             obj_tree: absolute path to the object tree.
-            fail_on_unknown_build_command: Whether to fail if an unknown build command is encountered.
 
         Returns:
             list[PathStr]: dependency file paths relative to `obj_tree`.
@@ -100,33 +97,3 @@ class CmdFile:
             cmd_file_dependencies.append(input_file)
         unique_cmd_file_dependencies = list(dict.fromkeys(cmd_file_dependencies))
         return unique_cmd_file_dependencies
-
-
-def _expand_resolve_files(input_files: list[PathStr], obj_tree: PathStr) -> list[PathStr]:
-    """
-    Expands resolve files which may reference additional files via '@' notation.
-
-    Args:
-        input_files (list[PathStr]): List of file paths relative to the object tree, where paths starting with '@' refer to files
-                                     containing further file paths, each on a separate line.
-        obj_tree: Absolute path to the root of the object tree.
-
-    Returns:
-        list[PathStr]: Flattened list of all input file paths, with any nested '@' file references resolved recursively.
-    """
-    expanded_input_files: list[PathStr] = []
-    for input_file in input_files:
-        if not input_file.startswith("@"):
-            expanded_input_files.append(input_file)
-            continue
-        resolve_file_path = os.path.join(obj_tree, input_file.removeprefix("@"))
-        if not os.path.exists(resolve_file_path):
-            sbom_logging.error(
-                "Skip resolving '{resolve_file_path}' because the response file does not exist.",
-                resolve_file_path=resolve_file_path,
-            )
-            continue
-        with open(resolve_file_path, "rt", encoding="utf-8") as f:
-            resolve_file_content = [line_stripped for line in f.readlines() if (line_stripped := line.strip())]
-        expanded_input_files += _expand_resolve_files(resolve_file_content, obj_tree)
-    return expanded_input_files
