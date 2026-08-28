@@ -198,14 +198,16 @@ if_changed = $(if $(if-changed-cond),$(cmd_and_savecmd),@:)
 
 cmd_and_savecmd =                                                            \
 	$(cmd);                                                              \
-	printf '%s\n' 'savedcmd_$@ := $(make-cmd)' > $(dot-target).cmd
+	printf '%s\n\n%s\n' 'savedcmd_$@ := $(make-cmd)'                    \
+		'make_prereqs_$@ := $(real-prereqs)' > $(dot-target).cmd
 
 # Execute the command and also postprocess generated .d dependencies file.
 if_changed_dep = $(if $(if-changed-cond),$(cmd_and_fixdep),@:)
 
 cmd_and_fixdep =                                                             \
 	$(cmd);                                                              \
-	$(objtree)/scripts/basic/fixdep $(depfile) $@ '$(make-cmd)' > $(dot-target).cmd;\
+	$(objtree)/scripts/basic/fixdep $(depfile) $@ '$(make-cmd)'          \
+		'$(real-prereqs)' > $(dot-target).cmd;                        \
 	rm -f $(depfile)
 
 # Usage: $(call if_changed_rule,foo)
