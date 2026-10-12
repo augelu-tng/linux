@@ -3,6 +3,7 @@
 
 from collections import deque
 from dataclasses import dataclass, field
+import os
 from typing import Iterator
 
 from sbom.cmd_graph.cmd_graph_node import CmdGraphNode, CmdGraphNodeConfig
@@ -29,7 +30,10 @@ class CmdGraph:
             CmdGraph: A graph of all build dependencies for the given root files.
         """
         node_cache: dict[PathStr, CmdGraphNode] = {}
-        root_nodes = [CmdGraphNode.create(root_path, config, node_cache) for root_path in root_paths]
+        root_nodes = [
+            CmdGraphNode.create(os.path.realpath(os.path.join(config.obj_tree, root_path)), config, node_cache)
+            for root_path in root_paths
+        ]
         return CmdGraph(root_nodes)
 
     def __iter__(self) -> Iterator[CmdGraphNode]:
