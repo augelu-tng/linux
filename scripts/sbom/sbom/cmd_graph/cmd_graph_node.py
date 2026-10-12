@@ -23,7 +23,6 @@ class IncbinDependency:
 class CmdGraphNodeConfig(Protocol):
     obj_tree: PathStr
     src_tree: PathStr
-    fail_on_unknown_build_command: bool
 
 
 @dataclass
