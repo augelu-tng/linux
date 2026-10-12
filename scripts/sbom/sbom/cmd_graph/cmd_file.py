@@ -76,7 +76,6 @@ class CmdFile:
 
         Args:
             obj_tree: absolute path to the object tree.
-            fail_on_unknown_build_command: Whether to fail if an unknown build command is encountered.
 
         Returns:
             list[PathStr]: dependency file paths relative to `obj_tree`.
